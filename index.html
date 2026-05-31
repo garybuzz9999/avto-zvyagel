@@ -163,9 +163,22 @@ loadAVPrices();
   .color-picker{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
   .color-opt{width:32px;height:32px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.15s;position:relative}
   .color-opt.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--accent)}
-  @media(max-width:640px){
+    @media(max-width:640px){
     .sidebar{display:none}
     .hero{padding:1.25rem 1rem}
+    .main{padding:1rem}
+    header{padding:0 0.75rem;height:56px}
+    .logo{font-size:13px;gap:6px}
+    .logo svg{width:18px;height:18px}
+    .stats-bar{padding:0.6rem 1rem}
+    .grid{grid-template-columns:1fr 1fr}
+    .btn-ghost{display:none}
+    .btn-white{padding:7px 10px;font-size:12px}
+    footer{flex-direction:column;gap:4px;text-align:center}
+  }
+  @media(max-width:400px){
+    .logo span{display:none}
+  }
     .main{padding:1rem}
     header{padding:0 1rem}
     .stats-bar{padding:0.6rem 1rem}
@@ -178,13 +191,9 @@ loadAVPrices();
 <header>
   <a href="#" class="logo">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 4v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-    Авто · Звягель
-  </a>
+    <span>Авто · Звягель</span></a>
   <div class="header-right">
-    <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      Звягель
-    </button>
+    
     <button class="btn btn-ghost" id="authBtn" onclick="openModal('loginModal')" style="font-size:12px;padding:6px 12px">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       Увійти
