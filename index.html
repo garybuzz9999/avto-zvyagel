@@ -1229,7 +1229,7 @@ function toast(msg){
   _tTimer=setTimeout(()=>el.classList.remove('show'),2800);
 }
 
-// ═══ POPUP ═══
+// ═══ POPUP (Firebase-синхронізований) ═══
 let _popupTimer;
 function closePopup(){
   document.getElementById('popupBanner').style.display='none';
@@ -1237,19 +1237,20 @@ function closePopup(){
   _popupTimer=setTimeout(()=>document.getElementById('popupBanner').style.display='flex',5*60*1000);
 }
 const POPUP_ADMIN_PASS = 'popup2026';
+const POPUP_DOC = db.collection('av_settings').doc('popup');
 
 function openPopupAdmin() {
   const p = prompt('Пароль банер-адмінки:');
   if (p === null) return;
   if (p !== POPUP_ADMIN_PASS) { alert('Невірний пароль'); return; }
-  initPopupAdmin();
   document.getElementById('popupAdminModal').style.display = 'flex';
+  initPopupAdmin();
 }
 function closePopupAdmin() {
   document.getElementById('popupAdminModal').style.display = 'none';
 }
-function initPopupAdmin() {
-  const s = getPopupSettings();
+async function initPopupAdmin() {
+  const s = await getPopupSettings();
   document.getElementById('popupToggle').checked = s.active;
   updateToggleUI(s.active);
   updatePreview(s.image);
@@ -1258,13 +1259,12 @@ function initPopupAdmin() {
   document.getElementById('popupDelayInput').value = d;
   document.getElementById('delayLabel').textContent = d;
 }
-function getPopupSettings() {
+async function getPopupSettings() {
   try {
-    const s = localStorage.getItem('popupSettings');
-    if (s) return JSON.parse(s);
-  } catch(e) {}
-  const img = document.querySelector('#popupBanner img');
-  return { active: true, image: img ? img.src : '', link: '', delay: 3000 };
+    const doc = await POPUP_DOC.get();
+    if (doc.exists) return doc.data();
+  } catch(e) { console.error('Помилка читання банера з Firebase:', e); }
+  return { active: false, image: '', link: '', delay: 3000 };
 }
 function updatePreview(src) {
   const img = document.getElementById('popupPreviewImg');
@@ -1279,6 +1279,7 @@ function updateToggleUI(active) {
 function togglePopupActive(active) { updateToggleUI(active); }
 function loadPopupImage(input) {
   const file = input.files[0]; if (!file) return;
+  if (file.size > 700*1024) { alert('Файл занадто великий. Оберіть зображення до 700KB.'); return; }
   const reader = new FileReader();
   reader.onload = function(e) { window._newPopupImage = e.target.result; updatePreview(e.target.result); };
   reader.readAsDataURL(file);
@@ -1290,16 +1291,25 @@ function deletePopupImage() {
   document.getElementById('popupToggle').checked = false;
   updateToggleUI(false);
 }
-function savePopupSettings() {
-  const s = getPopupSettings();
-  s.active = document.getElementById('popupToggle').checked;
-  s.link = document.getElementById('popupLinkInput').value.trim();
-  s.delay = parseInt(document.getElementById('popupDelayInput').value) * 1000;
-  if (window._newPopupImage !== undefined) { s.image = window._newPopupImage; window._newPopupImage = undefined; }
-  localStorage.setItem('popupSettings', JSON.stringify(s));
-  applyPopupSettings(s);
-  document.getElementById('popupSaveMsg').style.display = 'block';
-  setTimeout(() => document.getElementById('popupSaveMsg').style.display = 'none', 2000);
+async function savePopupSettings() {
+  const saveBtn = document.querySelector('#popupAdminModal button[onclick="savePopupSettings()"]');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '⏳ Збереження...'; }
+  try {
+    const s = await getPopupSettings();
+    s.active = document.getElementById('popupToggle').checked;
+    s.link = document.getElementById('popupLinkInput').value.trim();
+    s.delay = parseInt(document.getElementById('popupDelayInput').value) * 1000;
+    if (window._newPopupImage !== undefined) { s.image = window._newPopupImage; window._newPopupImage = undefined; }
+    await POPUP_DOC.set(s);
+    applyPopupSettings(s);
+    document.getElementById('popupSaveMsg').style.display = 'block';
+    setTimeout(() => document.getElementById('popupSaveMsg').style.display = 'none', 2000);
+  } catch(e) {
+    console.error('Помилка збереження банера:', e);
+    alert('Не вдалося зберегти. Перевірте з\'єднання та спробуйте ще раз.');
+  } finally {
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Зберегти'; }
+  }
 }
 function applyPopupSettings(s) {
   const popup = document.getElementById('popupBanner');
@@ -1319,11 +1329,11 @@ function applyPopupSettings(s) {
   }
   window._popupAdminTimer = setTimeout(() => { popup.style.display = 'flex'; }, s.delay);
 }
-(function() {
+(async function() {
   try {
-    const s = localStorage.getItem('popupSettings');
-    if (s) applyPopupSettings(JSON.parse(s));
-  } catch(e) {}
+    const s = await getPopupSettings();
+    applyPopupSettings(s);
+  } catch(e) { console.error('Помилка завантаження банера:', e); }
 })();
 
 // ═══ ЗБЕРЕЖЕННЯ СТАНУ ═══
