@@ -37,7 +37,7 @@ let AV_PRICES={publish:0,renew:0,active_days:30,inactive_days:30};
 async function loadAVPrices(){
   try{
     const snap=await db.collection('av_config').doc('prices').get();
-    if(snap.exists)AV_PRICES={...AV_PRICES,...snap.data()};
+    if(snap.exists)AV_PRICES={...AV_PRICES,...snap.data(),publish:0,renew:0};
   }catch(e){}
 }
 loadAVPrices();
@@ -583,7 +583,7 @@ loadAVPrices();
           <span style="font-size:13px;color:var(--text-muted)">Ваш баланс</span>
           <span style="font-size:15px;font-weight:700;font-family:'Unbounded',sans-serif" id="addBalance">0 грн</span>
         </div>
-        <div style="font-size:11px;color:var(--text-hint)">Публікація — <b id="publishPriceText">50 грн</b> · активне 30 днів</div>
+        <div style="font-size:11px;color:var(--text-hint)">🎁 Безкоштовно до 31.08.2026 · активне 30 днів</div>
         <button onclick="closeModal('addModal');openModal('topupModal')" style="margin-top:8px;padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border-mid);background:transparent;font-size:12px;font-weight:600;cursor:pointer;font-family:'Manrope',sans-serif;color:var(--text)">+ Поповнити рахунок</button>
       </div>
 
@@ -592,7 +592,7 @@ loadAVPrices();
       <button class="btn btn-outline" onclick="closeModal('addModal')">Скасувати</button>
       <button class="btn btn-dark" onclick="submitAd()" id="submitBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:15px;height:15px"><polyline points="20 6 9 17 4 12"/></svg>
-        Опублікувати · <span id="submitPrice">50</span> грн
+        ✓ Опублікувати безкоштовно
       </button>
     </div>
   </div>
